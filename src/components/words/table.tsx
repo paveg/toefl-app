@@ -1,10 +1,12 @@
-import { useReactTable, flexRender, getSortedRowModel, getCoreRowModel } from "@tanstack/react-table"
+import { useReactTable, flexRender, getSortedRowModel, getCoreRowModel, type SortingState } from "@tanstack/react-table"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~/ui/table"
 import { api } from "~/utils/api"
 import { type ColumnDef } from "@tanstack/react-table";
 import { type Word } from "@prisma/client";
 import { useState } from "react";
 import { Badge } from "~/ui/badge";
+import { Button } from "~/ui/button";
+import { ArrowUpDown } from "lucide-react";
 
 export const WordTable = () => {
   const { data: words, isLoading } = api.word.getAll.useQuery()
@@ -15,7 +17,14 @@ export const WordTable = () => {
     //   accessorKey: 'level'
     // },
     {
-      header: '単語',
+      header: ({ column }) => {
+        return (
+          <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+            単語
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        )
+      },
       accessorKey: 'word',
       cell: ({ row }) => {
         return <p className="font-bold">{row.getValue('word')}</p>
@@ -25,7 +34,7 @@ export const WordTable = () => {
       header: '意味',
       accessorKey: 'meaning',
       cell: ({ row }) => {
-        return <p className="text-left font-bold">{row.getValue('meaning')}</p>
+        return <p className="text-left">{row.getValue('meaning')}</p>
       }
     },
     {
@@ -40,8 +49,12 @@ export const WordTable = () => {
   const table = useReactTable({
     columns,
     data: words,
+    onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
     getCoreRowModel: getCoreRowModel(),
+    state: {
+      sorting,
+    },
   })
 
   if (isLoading) {
