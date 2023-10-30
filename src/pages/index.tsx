@@ -1,12 +1,11 @@
 
-import { WordTable } from "~/components/words/table";
+import { WordContainer } from "~/components/words/container";
 import { Layout } from "~/layouts";
-
 
 export default function Home() {
   return (
     <Layout>
-      <WordTable />
+      <WordContainer />
     </Layout>
   );
 }

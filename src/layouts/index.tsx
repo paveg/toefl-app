@@ -1,6 +1,7 @@
 import { Button } from "~/ui/button";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { LogIn, LogOut } from "lucide-react";
+import { type FC } from "react";
 
 function AuthShowcase() {
   const { data: sessionData } = useSession();
@@ -18,9 +19,11 @@ function AuthShowcase() {
   );
 }
 
+type Props = {
+  children: React.ReactNode
+}
 
-export const Layout = ({ children }) => {
-
+export const Layout: FC<Props> = ({ children }: Props) => {
   return (
     <main>
       <div className="container mx-auto m-2">

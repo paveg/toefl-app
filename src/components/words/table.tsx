@@ -1,17 +1,20 @@
 import { useReactTable, flexRender, getSortedRowModel, getCoreRowModel, type SortingState } from "@tanstack/react-table"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~/ui/table"
-import { api } from "~/utils/api"
 import { type ColumnDef } from "@tanstack/react-table";
 import { type Word } from "@prisma/client";
-import { useState } from "react";
+import { type FC, useState } from "react";
 import { Badge } from "~/ui/badge";
 import { Button } from "~/ui/button";
 import { ArrowUpDown } from "lucide-react";
 
-export const WordTable = () => {
-  const { data: words, isLoading } = api.word.getAll.useQuery()
+type Props = {
+  words: Word[]
+}
+
+export const WordTable: FC<Props> = (props) => {
+  const { words } = props
   const [sorting, setSorting] = useState<SortingState>([])
-  const columns: ColumnDef<Word>[] = [
+  const columns: ColumnDef<Word | undefined>[] = [
     // {
     //   header: 'level',
     //   accessorKey: 'level'
@@ -57,45 +60,41 @@ export const WordTable = () => {
     },
   })
 
-  if (isLoading) {
-    return <>Loading...</>
-  } else {
-    return <Table className="table-auto">
-      <TableHeader>
-        {table.getHeaderGroups().map((headerGroup) => (
-          <TableRow key={headerGroup.id}>
-            {headerGroup.headers.map((header) => {
-              return (
-                <TableHead key={header.id} className="">
-                  {header.isPlaceholder ? null : flexRender(
-                    header.column.columnDef.header,
-                    header.getContext()
-                  )}
-                </TableHead>
-              )
-            })}
+  return <Table className="table-auto">
+    <TableHeader>
+      {table.getHeaderGroups().map((headerGroup) => (
+        <TableRow key={headerGroup.id}>
+          {headerGroup.headers.map((header) => {
+            return (
+              <TableHead key={header.id} className="">
+                {header.isPlaceholder ? null : flexRender(
+                  header.column.columnDef.header,
+                  header.getContext()
+                )}
+              </TableHead>
+            )
+          })}
+        </TableRow>
+      ))}
+    </TableHeader>
+    <TableBody>
+      {table.getRowModel().rows?.length ? (
+        table.getRowModel().rows.map((row) => (
+          <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+            {row.getVisibleCells().map((cell) => (
+              <TableCell key={cell.id} className="">
+                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+              </TableCell>
+            ))}
           </TableRow>
-        ))}
-      </TableHeader>
-      <TableBody>
-        {table.getRowModel().rows?.length ? (
-          table.getRowModel().rows.map((row) => (
-            <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
-              {row.getVisibleCells().map((cell) => (
-                <TableCell key={cell.id} className="">
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </TableCell>
-              ))}
-            </TableRow>
-          ))
-        ) : (
-          <TableRow>
-            <TableCell colSpan={columns.length} className="h-24 text-center">
-              英単語が存在しません。
-            </TableCell>
-          </TableRow>
-        )}
-      </TableBody>
-    </Table>
-  }
+        ))
+      ) : (
+        <TableRow>
+          <TableCell colSpan={columns.length} className="h-24 text-center">
+            英単語が存在しません。
+          </TableCell>
+        </TableRow>
+      )}
+    </TableBody>
+  </Table>
 }
