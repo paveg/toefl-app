@@ -61,14 +61,14 @@ export const WordTable: FC<Props> = (props) => {
       header: '意味',
       accessorKey: 'meaning',
       cell: ({ row }) => {
-        return <p className="text-left">{row.getValue('meaning')}</p>
+        return <p className="text-left text-xs">{row.getValue('meaning')}</p>
       }
     },
     {
       header: '発音記号',
       accessorKey: 'phoneticSymbol',
       cell: ({ row }) => {
-        return <p className="font-italic">{row.getValue('phoneticSymbol')}</p>
+        return <p className="font-italic text-xs">{row.getValue('phoneticSymbol')}</p>
       }
     },
     {

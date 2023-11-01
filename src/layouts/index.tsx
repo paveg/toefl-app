@@ -26,9 +26,9 @@ type Props = {
 export const Layout: FC<Props> = ({ children }: Props) => {
   return (
     <main>
-      <div className="container mx-auto m-2">
+      <div className="md:container mx-auto m-2">
         <div className="flex items-center justify-between space-y-2">
-          <div>
+          <div className="m-4">
             <h2 className="text-2xl font-bold tracking-tight">TOEFL Training</h2>
             <p className="text-muted-foreground">Getting started!</p>
           </div>
