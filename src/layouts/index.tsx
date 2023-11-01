@@ -32,7 +32,7 @@ export const Layout: FC<Props> = ({ children }: Props) => {
             <h2 className="text-2xl font-bold tracking-tight">TOEFL Training</h2>
             <p className="text-muted-foreground">Getting started!</p>
           </div>
-          <div>
+          <div className="m-4">
             <AuthShowcase />
           </div>
         </div>
