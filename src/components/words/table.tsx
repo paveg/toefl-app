@@ -41,6 +41,13 @@ export const WordTable: FC<Props> = (props) => {
       }
     },
     {
+      header: '発音記号',
+      accessorKey: 'phoneticSymbol',
+      cell: ({ row }) => {
+        return <p className="font-italic">{row.getValue('phoneticSymbol')}</p>
+      }
+    },
+    {
       header: '品詞',
       accessorKey: 'lexicalCategory',
       cell: ({ row }) => {

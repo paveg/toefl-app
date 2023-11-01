@@ -67,6 +67,7 @@ model Word {
     meaning         String
     level           String
     lexicalCategory String // noun, verb, adjective, adverb, pronoun, preposition, conjunction, determiner, exclamation
+    phoneticSymbol  String
     userWords       UserWord[]
 }
 
