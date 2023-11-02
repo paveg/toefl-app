@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { type FC } from "react";
 import { Skeleton } from "~/ui/skeleton";
 import {
@@ -25,7 +26,7 @@ export const SkeletonTable: FC<Props> = ({
       ) : (
         <TableHeader>
           <TableRow>
-            {Array<number>(columnCount).fill(0).map((_, i) => (
+            {[...Array(columnCount)].map((_, i) => (
               <TableHead
                 key={`skeleton-table-head-${i}`}
                 className="text-center"
@@ -37,9 +38,9 @@ export const SkeletonTable: FC<Props> = ({
         </TableHeader>
       )}
       <TableBody>
-        {[...Array<number>(10)].map((_, i) => (
+        {[...Array(10)].map((_, i) => (
           <TableRow key={`skeleton-table-row-${i}`}>
-            {Array<number>(columnCount).fill(0).map((_, i) => (
+            {[...Array(columnCount)].map((_, i) => (
               <TableCell
                 key={`skeleton-table-cell-${i}`}
                 className="text-center"
