@@ -30,8 +30,10 @@ const convertLexicalCategoryJp = (lexicalCategory: string) => {
       return '間'
     case 'pronoun':
       return '代'
+    case 'abbreviation':
+      return '略'
     default:
-      return 'その他'
+      return '他'
   }
 }
 
@@ -61,7 +63,7 @@ export const WordTable: FC<Props> = (props) => {
       header: '意味',
       accessorKey: 'meaning',
       cell: ({ row }) => {
-        return <p className="text-left text-xs">{row.getValue('meaning')}</p>
+        return <p className="text-left text-xs font-bold text-blue-700">{row.getValue('meaning')}</p>
       }
     },
     {
