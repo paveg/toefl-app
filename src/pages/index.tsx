@@ -7,7 +7,7 @@ export default function Home() {
   const { data: sessionData } = useSession();
   return (
     <Layout>
-      {sessionData && <WordContainer user={sessionData.user} />}
+      <WordContainer user={sessionData?.user} />
     </Layout>
   );
 }

@@ -5,22 +5,71 @@ import { type Word } from "@prisma/client";
 import { type FC, useState } from "react";
 import { Badge } from "~/ui/badge";
 import { Button } from "~/ui/button";
-import { ArrowUpDown } from "lucide-react";
-import { DataTablePagination } from "../data-table-pagination";
+import { ArrowUpDown, CheckCircle, Eye, EyeOff, Pen } from "lucide-react";
+import { DataTablePagination } from "../../data-table-pagination";
+// import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "~/ui/dropdown-menu";
+import { api } from "~/utils/api";
+import { LoadingButton } from "../../loading-button";
 import { convertLexicalCategoryJp } from "~/lib/word";
+import { type DefaultSession } from "next-auth";
 
 type Props = {
+  user: DefaultSession['user'] & {
+    id: string;
+  };
   words: Word[];
 }
 
-export const WordTable: FC<Props> = (props) => {
-  const { words } = props
+export const LoggedinWordTable: FC<Props> = (props) => {
+  const { words, user } = props
+  const { data: userWords, isLoading, refetch } = api.userWord.getAllByUserId.useQuery({ userId: user.id })
   const [sorting, setSorting] = useState<SortingState>([])
+  const [hideMemorizedRow, setHideMemorizedRow] = useState<boolean>(false)
   const columns: ColumnDef<Word | undefined>[] = [
     // {
     //   header: 'level',
     //   accessorKey: 'level'
     // },
+    {
+      header: () => {
+        return (
+          <Button onClick={() => setHideMemorizedRow(!hideMemorizedRow)} variant="ghost">
+            {hideMemorizedRow ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+          </Button>
+        )
+      },
+      id: 'userWord',
+      enableHiding: false,
+      cell: ({ row }) => {
+        const word = row.original
+        const userWord = userWords?.find(userWord => userWord.wordId === word?.id)
+        const { mutateAsync: createWord } = api.userWord.createByWordId.useMutation()
+        const { mutateAsync: deleteWord } = api.userWord.deleteById.useMutation()
+
+        if (isLoading || !word) {
+          return <LoadingButton />
+        } else {
+          return userWord ?
+            <Button variant="ghost" onClick={
+              () => deleteWord({
+                id: userWord.id,
+              }, {
+                onSuccess: () => void refetch()
+              })
+            }>
+              <CheckCircle className="h-4 w-4" />
+            </Button > :
+            <Button variant="ghost" onClick={() => createWord({
+              wordId: word.id,
+              userId: user.id,
+            }, {
+              onSuccess: () => void refetch()
+            })}>
+              <Pen className="h-4 w-4" />
+            </Button>
+        }
+      }
+    },
     {
       header: ({ column }) => {
         return (
@@ -56,6 +105,29 @@ export const WordTable: FC<Props> = (props) => {
         return <Badge>{convertLexicalCategoryJp(row.getValue('lexicalCategory'))}</Badge>
       }
     },
+    // {
+    //   id: "actions",
+    //   enableHiding: true,
+    //   cell: ({ row }) => {
+    //     const word = row.original
+
+    //     return (
+    //       <DropdownMenu key={word.id}>
+    //         <DropdownMenuTrigger asChild>
+    //           <Button variant="ghost" className="h-8 w-8 p-0">
+    //             <span className="sr-only">メニューを開く</span>
+    //             <MoreHorizontal className="h-4 w-4" />
+    //           </Button>
+    //         </DropdownMenuTrigger>
+    //         <DropdownMenuContent align="end">
+    //           <DropdownMenuLabel>Actions</DropdownMenuLabel>
+    //           <DropdownMenuSeparator />
+    //           <DropdownMenuItem onClick={() => console.info(word.id)}>Done</DropdownMenuItem>
+    //         </DropdownMenuContent>
+    //       </DropdownMenu >
+    //     )
+    //   },
+    // },
   ]
 
   const table = useReactTable({
@@ -92,13 +164,14 @@ export const WordTable: FC<Props> = (props) => {
       <TableBody>
         {table.getRowModel().rows?.length ? (
           table.getRowModel().rows.map((row) => {
-            return <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+            const word = row.original
+            return hideMemorizedRow && userWords?.find((uw) => uw.wordId === word?.id) ? null : (<TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
               {row.getVisibleCells().map((cell) => {
                 return <TableCell key={cell.id} className="">
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </TableCell>
               })}
-            </TableRow>
+            </TableRow>)
           })
         ) : (
           <TableRow>

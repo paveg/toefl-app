@@ -1,12 +1,15 @@
 import { api } from "~/utils/api"
-import { WordTable } from "./table"
+import { LoggedinWordTable } from "./loggedin/table"
 import { SkeletonTable } from "../skeleton-table"
 import { TableHead, TableHeader, TableRow } from "~/ui/table"
-import { type User } from "@prisma/client"
 import { type FC } from "react"
+import { WordTable } from "./table"
+import { type DefaultSession } from "next-auth"
 
 type Props = {
-  user: User
+  user?: DefaultSession["user"] & {
+    id: string;
+  }
 }
 export const WordContainer: FC<Props> = (props) => {
   const { user } = props
@@ -23,7 +26,9 @@ export const WordContainer: FC<Props> = (props) => {
             <TableHead className="">品詞</TableHead>
           </TableRow>
         </TableHeader>
-      } columnCount={4} />) : (words?.length && <WordTable words={words} user={user} />)}
+      } columnCount={4} />) :
+        user ? (words?.length && <LoggedinWordTable words={words} user={user} />) : (words?.length && <WordTable words={words} />)
+      }
     </>
   )
 }
