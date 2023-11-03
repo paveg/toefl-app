@@ -1,15 +1,18 @@
 import { useReactTable, flexRender, getSortedRowModel, getCoreRowModel, getPaginationRowModel, type SortingState } from "@tanstack/react-table"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~/ui/table"
 import { type ColumnDef } from "@tanstack/react-table";
-import { type Word } from "@prisma/client";
+import { type User, type Word } from "@prisma/client";
 import { type FC, useState } from "react";
 import { Badge } from "~/ui/badge";
 import { Button } from "~/ui/button";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import { DataTablePagination } from "../data-table-pagination";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "~/ui/dropdown-menu";
+import { api } from "~/utils/api";
 
 type Props = {
-  words: Word[]
+  user: User;
+  words: Word[];
 }
 
 const convertLexicalCategoryJp = (lexicalCategory: string) => {
@@ -38,7 +41,8 @@ const convertLexicalCategoryJp = (lexicalCategory: string) => {
 }
 
 export const WordTable: FC<Props> = (props) => {
-  const { words } = props
+  const { words, user } = props
+  const { data: userWords, isLoading } = api.userWord.getAllByUserId.useQuery({ userId: user.id })
   const [sorting, setSorting] = useState<SortingState>([])
   const columns: ColumnDef<Word | undefined>[] = [
     // {
@@ -46,10 +50,22 @@ export const WordTable: FC<Props> = (props) => {
     //   accessorKey: 'level'
     // },
     {
+      id: 'history',
+      cell: ({ row }) => {
+        const word = row.original
+        const userWord = userWords?.find(userWord => userWord.wordId === word.id)
+        if (isLoading) {
+          <div>isLoading...</div>
+        } else {
+          return userWord ? <>checked</> : <>unchecked</>
+        }
+      }
+    },
+    {
       header: ({ column }) => {
         return (
           <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
-            単語
+            Word
             <ArrowUpDown className="ml-2 h-4 w-4" />
           </Button>
         )
@@ -60,25 +76,53 @@ export const WordTable: FC<Props> = (props) => {
       }
     },
     {
-      header: '意味',
+      header: 'Meaning',
       accessorKey: 'meaning',
       cell: ({ row }) => {
         return <p className="text-left text-xs font-bold text-blue-700">{row.getValue('meaning')}</p>
       }
     },
     {
-      header: '発音記号',
+      header: 'Phonetic Symbol',
       accessorKey: 'phoneticSymbol',
       cell: ({ row }) => {
         return <p className="font-italic text-xs">{row.getValue('phoneticSymbol')}</p>
       }
     },
     {
-      header: '品詞',
+      header: 'Lexical Category',
       accessorKey: 'lexicalCategory',
       cell: ({ row }) => {
         return <Badge>{convertLexicalCategoryJp(row.getValue('lexicalCategory'))}</Badge>
       }
+    },
+    {
+      id: "actions",
+      enableHiding: false,
+      cell: ({ row }) => {
+        const word = row.original
+        const { mutateAsync } = api.userWord.createByWordId.useMutation()
+
+        return (
+          <DropdownMenu key={word.id}>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">メニューを開く</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => mutateAsync({
+                wordId: word.id,
+                userId: user.id,
+              })
+              }>Done</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu >
+        )
+      },
     },
   ]
 
@@ -89,6 +133,7 @@ export const WordTable: FC<Props> = (props) => {
     getSortedRowModel: getSortedRowModel(),
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    debugRows: true,
     state: {
       sorting,
     },

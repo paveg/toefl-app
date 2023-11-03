@@ -2,8 +2,14 @@ import { api } from "~/utils/api"
 import { WordTable } from "./table"
 import { SkeletonTable } from "../skeleton-table"
 import { TableHead, TableHeader, TableRow } from "~/ui/table"
+import { type User } from "@prisma/client"
+import { type FC } from "react"
 
-export const WordContainer = () => {
+type Props = {
+  user: User
+}
+export const WordContainer: FC<Props> = (props) => {
+  const { user } = props
   const { data: words, isLoading } = api.word.getAll.useQuery()
 
   return (
@@ -17,7 +23,7 @@ export const WordContainer = () => {
             <TableHead className="">品詞</TableHead>
           </TableRow>
         </TableHeader>
-      } columnCount={4} />) : (words?.length && <WordTable words={words} />)}
+      } columnCount={4} />) : (words?.length && <WordTable words={words} user={user} />)}
     </>
   )
 }
