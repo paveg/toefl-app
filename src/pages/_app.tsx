@@ -6,6 +6,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
 import { api } from "~/utils/api";
 import "../app/globals.css"
+import { MultiProvider } from "~/components/providers/multi-provider";
 
 function MyApp({ Component, pageProps }: AppProps<{ session: Session }>) {
   return (
@@ -22,7 +23,9 @@ function MyApp({ Component, pageProps }: AppProps<{ session: Session }>) {
         />
       </Head>
       <SessionProvider session={pageProps.session}>
-        <Component {...pageProps} />
+        <MultiProvider>
+          <Component {...pageProps} />
+        </MultiProvider>
         <ReactQueryDevtools initialIsOpen={false} />
       </SessionProvider >
     </>

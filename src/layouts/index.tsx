@@ -2,6 +2,7 @@ import { Button } from "~/ui/button";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { LogIn, LogOut } from "lucide-react";
 import { type FC } from "react";
+import { Toaster } from "~/ui/toaster";
 
 function AuthShowcase() {
   const { data: sessionData } = useSession();
@@ -38,6 +39,7 @@ export const Layout: FC<Props> = ({ children }: Props) => {
         </div>
         <div className="my-4">
           {children}
+          <Toaster />
         </div>
       </div>
     </main>
