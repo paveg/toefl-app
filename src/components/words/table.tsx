@@ -65,7 +65,6 @@ export const WordTable: FC<Props> = (props) => {
     getSortedRowModel: getSortedRowModel(),
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    debugRows: true,
     state: {
       sorting,
     },

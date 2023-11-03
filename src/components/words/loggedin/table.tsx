@@ -12,6 +12,7 @@ import { api } from "~/utils/api";
 import { LoadingButton } from "../../loading-button";
 import { convertLexicalCategoryJp } from "~/lib/word";
 import { type DefaultSession } from "next-auth";
+import { useToast } from "~/ui/use-toast";
 
 type Props = {
   user: DefaultSession['user'] & {
@@ -22,6 +23,7 @@ type Props = {
 
 export const LoggedinWordTable: FC<Props> = (props) => {
   const { words, user } = props
+  const { toast } = useToast()
   const { data: userWords, isLoading, refetch } = api.userWord.getAllByUserId.useQuery({ userId: user.id })
   const [sorting, setSorting] = useState<SortingState>([])
   const [hideMemorizedRow, setHideMemorizedRow] = useState<boolean>(false)
@@ -54,7 +56,12 @@ export const LoggedinWordTable: FC<Props> = (props) => {
               () => deleteWord({
                 id: userWord.id,
               }, {
-                onSuccess: () => void refetch()
+                onSuccess: () => {
+                  toast({
+                    title: '単語を学習済みから削除しました。',
+                  })
+                  void refetch()
+                }
               })
             }>
               <CheckCircle className="h-4 w-4" />
@@ -63,10 +70,15 @@ export const LoggedinWordTable: FC<Props> = (props) => {
               wordId: word.id,
               userId: user.id,
             }, {
-              onSuccess: () => void refetch()
+              onSuccess: () => {
+                toast({
+                  title: '単語を学習済みに追加しました。',
+                })
+                void refetch()
+              }
             })}>
               <Pen className="h-4 w-4" />
-            </Button>
+            </Button >
         }
       }
     },
@@ -137,7 +149,6 @@ export const LoggedinWordTable: FC<Props> = (props) => {
     getSortedRowModel: getSortedRowModel(),
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    debugRows: true,
     state: {
       sorting,
     },
