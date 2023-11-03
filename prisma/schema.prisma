@@ -75,8 +75,8 @@ model UserWord {
     id                String @id @default(cuid())
     userId            String
     wordId            String
-    correctAttempts   Int
-    incorrectAttempts Int
+    correctAttempts   Int    @default(0)
+    incorrectAttempts Int    @default(0)
     word              Word   @relation(fields: [wordId], references: [id])
     user              User   @relation(fields: [userId], references: [id])
 

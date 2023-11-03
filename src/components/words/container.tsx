@@ -1,9 +1,18 @@
 import { api } from "~/utils/api"
-import { WordTable } from "./table"
+import { LoggedinWordTable } from "./loggedin/table"
 import { SkeletonTable } from "../skeleton-table"
 import { TableHead, TableHeader, TableRow } from "~/ui/table"
+import { type FC } from "react"
+import { WordTable } from "./table"
+import { type DefaultSession } from "next-auth"
 
-export const WordContainer = () => {
+type Props = {
+  user?: DefaultSession["user"] & {
+    id: string;
+  }
+}
+export const WordContainer: FC<Props> = (props) => {
+  const { user } = props
   const { data: words, isLoading } = api.word.getAll.useQuery()
 
   return (
@@ -17,7 +26,9 @@ export const WordContainer = () => {
             <TableHead className="">品詞</TableHead>
           </TableRow>
         </TableHeader>
-      } columnCount={4} />) : (words?.length && <WordTable words={words} />)}
+      } columnCount={4} />) :
+        user ? (words?.length && <LoggedinWordTable words={words} user={user} />) : (words?.length && <WordTable words={words} />)
+      }
     </>
   )
 }
