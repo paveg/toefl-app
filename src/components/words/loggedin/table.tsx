@@ -13,6 +13,7 @@ import { LoadingButton } from "../../loading-button";
 import { convertLexicalCategoryJp } from "~/lib/word";
 import { type DefaultSession } from "next-auth";
 import { useToast } from "~/ui/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
 
 type Props = {
   user: DefaultSession['user'] & {
@@ -23,8 +24,10 @@ type Props = {
 
 export const LoggedinWordTable: FC<Props> = (props) => {
   const { words, user } = props
+  const queryClient = useQueryClient();
   const { toast } = useToast()
-  const { data: userWords, isLoading, refetch } = api.userWord.getAllByUserId.useQuery({ userId: user.id })
+  const { data: userWords, isLoading } = api.userWord.getAllByUserId.useQuery({ userId: user.id })
+  const queryKey = api.userWord.getAllByUserId.getQueryKey({ userId: user.id })
   const [sorting, setSorting] = useState<SortingState>([])
   const [hideMemorizedRow, setHideMemorizedRow] = useState<boolean>(false)
   const columns: ColumnDef<Word | undefined>[] = [
@@ -45,8 +48,8 @@ export const LoggedinWordTable: FC<Props> = (props) => {
       cell: ({ row }) => {
         const word = row.original
         const userWord = userWords?.find(userWord => userWord.wordId === word?.id)
-        const { mutate: createWord } = api.userWord.createByWordId.useMutation()
-        const { mutate: deleteWord } = api.userWord.deleteById.useMutation()
+        const { mutateAsync: createWord } = api.userWord.createByWordId.useMutation()
+        const { mutateAsync: deleteWord } = api.userWord.deleteById.useMutation()
 
         if (isLoading || !word) {
           return <LoadingButton />
@@ -58,23 +61,27 @@ export const LoggedinWordTable: FC<Props> = (props) => {
               }, {
                 onSuccess: () => {
                   toast({
-                    title: '単語を学習済みから削除しました。',
+                    title: `${userWord.word.word}を学習済みから削除しました。`,
+                    variant: "destructive",
                   })
-                  void refetch()
+                },
+                onSettled: () => {
+                  void queryClient.invalidateQueries({ queryKey: queryKey })
                 }
-              })
-            }>
+              })}>
               <CheckCircle className="h-4 w-4" />
             </Button > :
             <Button variant="ghost" onClick={() => createWord({
               wordId: word.id,
               userId: user.id,
             }, {
-              onSuccess: () => {
+              onSuccess: (newRecord) => {
                 toast({
-                  title: '単語を学習済みに追加しました。',
+                  title: `${newRecord.word.word}を学習済みに追加しました。`,
                 })
-                void refetch()
+              },
+              onSettled: () => {
+                void queryClient.invalidateQueries({ queryKey: queryKey })
               }
             })}>
               <Pen className="h-4 w-4" />

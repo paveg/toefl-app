@@ -9,6 +9,9 @@ export const userWordRouter = createTRPCRouter({
     return ctx.db.userWord.findMany({
       where: {
         userId: input.userId
+      },
+      include: {
+        word: true,
       }
     })
   }),
@@ -20,6 +23,9 @@ export const userWordRouter = createTRPCRouter({
       data: {
         userId: input.userId,
         wordId: input.wordId,
+      },
+      include: {
+        word: true,
       }
     })
     return newRecord
