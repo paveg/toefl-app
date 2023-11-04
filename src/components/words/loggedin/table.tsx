@@ -2,7 +2,7 @@ import { useReactTable, flexRender, getSortedRowModel, getCoreRowModel, getPagin
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~/ui/table"
 import { type ColumnDef } from "@tanstack/react-table";
 import { type Word } from "@prisma/client";
-import { type FC, useState } from "react";
+import { type FC, useState, useMemo } from "react";
 import { Badge } from "~/ui/badge";
 import { Button } from "~/ui/button";
 import { ArrowUpDown, CheckCircle, Eye, EyeOff, Pen } from "lucide-react";
@@ -148,10 +148,12 @@ export const LoggedinWordTable: FC<Props> = (props) => {
     //   },
     // },
   ]
-
+  const filteredWords = useMemo(
+    () => words.filter((word) => hideMemorizedRow ? !userWords?.some((uw) => uw.wordId === word?.id) : true), [words, userWords, hideMemorizedRow]
+  )
   const table = useReactTable({
     columns,
-    data: words,
+    data: filteredWords,
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
     getCoreRowModel: getCoreRowModel(),
