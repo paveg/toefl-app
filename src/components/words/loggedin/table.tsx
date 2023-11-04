@@ -45,8 +45,8 @@ export const LoggedinWordTable: FC<Props> = (props) => {
       cell: ({ row }) => {
         const word = row.original
         const userWord = userWords?.find(userWord => userWord.wordId === word?.id)
-        const { mutateAsync: createWord } = api.userWord.createByWordId.useMutation()
-        const { mutateAsync: deleteWord } = api.userWord.deleteById.useMutation()
+        const { mutate: createWord } = api.userWord.createByWordId.useMutation()
+        const { mutate: deleteWord } = api.userWord.deleteById.useMutation()
 
         if (isLoading || !word) {
           return <LoadingButton />
