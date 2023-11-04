@@ -56,7 +56,7 @@ export const LoggedinWordTable: FC<Props> = (props) => {
         } else {
           return userWord ?
             <Button variant="ghost" onClick={
-              () => deleteWord({
+              async () => await deleteWord({
                 id: userWord.id,
               }, {
                 onSuccess: () => {
@@ -71,19 +71,20 @@ export const LoggedinWordTable: FC<Props> = (props) => {
               })}>
               <CheckCircle className="h-4 w-4" />
             </Button > :
-            <Button variant="ghost" onClick={() => createWord({
-              wordId: word.id,
-              userId: user.id,
-            }, {
-              onSuccess: (newRecord) => {
-                toast({
-                  title: `${newRecord.word.word}を学習済みに追加しました。`,
-                })
-              },
-              onSettled: () => {
-                void queryClient.invalidateQueries({ queryKey: queryKey })
-              }
-            })}>
+            <Button variant="ghost" onClick={
+              async () => await createWord({
+                wordId: word.id,
+                userId: user.id,
+              }, {
+                onSuccess: (newRecord) => {
+                  toast({
+                    title: `${newRecord.word.word}を学習済みに追加しました。`,
+                  })
+                },
+                onSettled: () => {
+                  void queryClient.invalidateQueries({ queryKey: queryKey })
+                }
+              })}>
               <Pen className="h-4 w-4" />
             </Button >
         }
@@ -184,14 +185,13 @@ export const LoggedinWordTable: FC<Props> = (props) => {
       <TableBody>
         {table.getRowModel().rows?.length ? (
           table.getRowModel().rows.map((row) => {
-            const word = row.original
-            return hideMemorizedRow && userWords?.find((uw) => uw.wordId === word?.id) ? null : (<TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+            return <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
               {row.getVisibleCells().map((cell) => {
                 return <TableCell key={cell.id} className="">
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </TableCell>
               })}
-            </TableRow>)
+            </TableRow>
           })
         ) : (
           <TableRow>
